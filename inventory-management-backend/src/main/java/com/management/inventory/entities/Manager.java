@@ -37,6 +37,7 @@ public class Manager implements UserDetails{
 	
 	@Column(name = "password", nullable = false)
 	private String password;
+	
 	private boolean status;
 	
 //	@OneToMany(mappedBy = "manager", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

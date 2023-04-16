@@ -30,8 +30,8 @@ import com.management.inventory.security.SecureManagerService;
 @EnableWebMvc
 public class SecurityConfiguration {
 	
-	public static final String[] PUBLIC_URLS = {"/api/v1/auth/**", "/v3/api-docs", "/v2/api-docs",
-            "/swagger-resources/**", "/swagger-ui/**", "/webjars/**"
+	public static final String[] PUBLIC_URLS = {"/api/v1/auth/**","/api/items/**", "/api/vendors/**",
+			"/api/requests/**"
 
     };
 	
@@ -47,13 +47,12 @@ public class SecurityConfiguration {
 	@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.
-                csrf()
+        http.csrf()
                 .disable()
                 .authorizeHttpRequests()
                 .requestMatchers(PUBLIC_URLS)
                 .permitAll()
-                .requestMatchers(HttpMethod.GET)
+                .requestMatchers(HttpMethod.PUT)
                 .permitAll()
                 .anyRequest()
                 .authenticated()

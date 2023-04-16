@@ -10,7 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +30,8 @@ import com.management.inventory.security.JwtTokenHelper;
 import com.management.inventory.security.SecureManagerService;
 import com.management.inventory.services.ManagerService;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @RestController
@@ -74,11 +79,13 @@ public class AuthController {
 	}
 
 	// register new user api
-
 	@PostMapping("/register")
-	public ResponseEntity<ManagerDto> registerUser(@Valid @RequestBody ManagerDto managerDto) {
-		ManagerDto registeredUser = this.managerService.registerNewManager(managerDto);
-		return new ResponseEntity<ManagerDto>(registeredUser, HttpStatus.CREATED);
+	public ResponseEntity<?> registerUser(@Valid @RequestBody ManagerDto managerDto) {
+		if(this.managerRepository.findByEmail(managerDto.getEmail()).isEmpty()) {
+			ManagerDto registeredUser = this.managerService.registerNewManager(managerDto);
+			return ResponseEntity.status(HttpStatus.CREATED).body(HttpStatus.CREATED.value());
+	    }
+	    return ResponseEntity.status(HttpStatus.ALREADY_REPORTED).body(HttpStatus.ALREADY_REPORTED.value());
 	}
 
 	// get loggedin user data
@@ -91,6 +98,20 @@ public class AuthController {
 	public ResponseEntity<ManagerDto> getUser(Principal principal) {
 		Manager manager = this.managerRepository.findByEmail(principal.getName()).get();
 		return new ResponseEntity<ManagerDto>(this.mapper.map(manager, ManagerDto.class), HttpStatus.OK);
+	}
+	
+	@PostMapping("/logout")
+	public ResponseEntity<JwtAuthResponse> deleteToken(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();  
+        if (auth != null){      
+           new SecurityContextLogoutHandler().logout(request, response, auth);  
+        }
+        
+        JwtAuthResponse returnResponse = new JwtAuthResponse();
+		
+		returnResponse.setToken(null);
+		
+		return new ResponseEntity<JwtAuthResponse>(returnResponse, HttpStatus.OK);
 	}
 
 }
