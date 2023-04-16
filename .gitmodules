@@ -2,4 +2,4 @@
 
 [submodule "inventory-management-frontend"]
 	path = inventory-management-frontend
-	url = https://github.com/Raviteja77/inventory-management.git
+	url = https://github.com/Raviteja77/inventory-management-frontend.git
